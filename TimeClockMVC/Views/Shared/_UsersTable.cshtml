@@ -1,0 +1,43 @@
+﻿@model TimeClockMVC.Models.RegisterUserViewModel
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3">Usuarios</th>
+                <th scope="col" class="px-6 py-3">Nombre</th>
+                <th scope="col" class="px-6 py-3">Rol</th>
+                <th scope="col" class="px-6 py-3">Estatus</th>
+                <th scope="col" class="px-6 py-3">
+                    <span class="sr-only">Editar</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.registerUser != null && Model.registerUser.Any())
+            {
+                @foreach (var users in Model.registerUser)
+                {
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            @users.Email
+                        </th>
+                        <td class="px-6 py-4">@users.Id - @users.FirstName @users.LastName</td>
+                        <td class="px-6 py-4">@users.Rol</td>
+                        <td class="px-6 py-4">@users.IsActive</td>
+                        <td class="px-6 py-4">
+                            <!-- mandar a otra vista -->
+                            <a data-modal-target="defaultModal"
+                       data-modal-toggle="defaultModal"
+                       class="font-medium text-blue-600 hover:underline"
+                       type="submit" href="/Users/updateUsers?empcode=@users.Id">
+                                Editar
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

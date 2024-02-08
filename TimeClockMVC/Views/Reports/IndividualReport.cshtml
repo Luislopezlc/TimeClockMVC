@@ -1,0 +1,174 @@
+﻿<div class="container mx-auto py-10">
+    <h1 class="text-3xl font-bold">
+        Reporte de Incidencias
+    </h1>
+    <p class="pt-3">
+        Maximiza la productividad de tu área de RH con nuestro software de reporte de incidencias digitalizado. Ahorra tiempo y evita errores manuales.
+    </p>
+    <div>
+        <h3 class="text-xl font-bold mt-3">Filtros</h3>
+        <div date-rangepicker class="flex items-center">
+            <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                         fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                    </svg>
+                </div>
+                <input name="start" 
+                       id="initialDate"
+                       type="date"
+                       value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5"
+                       placeholder="Fecha de Inicio">
+            </div>
+            <span class="mx-4 text-gray-500">a</span>
+            <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                         fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                    </svg>
+                </div>
+                <input name="end" 
+                       id="endDate"
+                       type="date"
+                       value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5"
+                       placeholder="Fecha final">
+            </div>
+        </div>
+        <div>
+            <button type="button" onclick="GenerateIncidentReport()"
+                    class=" focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 my-2 mb-2">
+                Generar
+            </button>
+        </div>
+    </div>
+    
+    <div id="incidentReport">
+
+    </div>
+
+</div>
+
+
+                       
+@section Scripts{
+
+    <script>
+        var token = "@Context.Session.GetString("Token")";
+
+        var urlBase = "@Model.UrlApi";
+
+        var user = {};
+
+        function GenerateIncidentReport() {
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat('Users'),
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    user = data;
+                    console.log(user);
+                    GetIncidentReport(data.payload.id);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+
+        function GetIncidentReport(empCode) {
+
+            var modelJson = 
+            {
+                EmployeeCode : empCode,
+                InitialDate : document.getElementById('initialDate').value,
+                EndDate: document.getElementById('endDate').value,
+            };
+
+
+            $.ajax({
+                type: "POST",
+                url: urlBase.concat('Transactions/GetIncidentsIndividualReport'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(modelJson),
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    console.log(data)
+                    PartialViewIncidentsIndividualTable(data.payload);
+
+                    console.log("data que se manda a la vista parcial");
+                    console.log(data.payload.employeeIncidentsReport);
+
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+        function PartialViewIncidentsIndividualTable(incidents) {
+            $.ajax({
+                type: "POST",
+                url: "/Reports/IndividualReportTable",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(incidents),
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    //  console.log(data);
+                    $("#incidentReport").empty();
+                    $("#incidentReport").append(data);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+                }
+            });
+        }
+
+
+    </script>
+
+}

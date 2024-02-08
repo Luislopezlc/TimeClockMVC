@@ -1,0 +1,423 @@
+﻿@model TimeClockMVC.Models.ShowEmployeesViewModel
+
+@if (Model.Employees != null && Model.Employees.Any())
+{
+
+    <table class="w-2/3 text-sm  text-gray-500 dark:text-gray-400 border border-stone-950">
+        <thead class="text-xs text-gray-900 bg-orange-300 uppercase dark:text-black-400">
+            <tr>
+                <th scope="col" class="px-6 py-3 border border-stone-950 text-left">
+                    Nombre
+                </th>
+                <th scope="col" class="px-6 py-3 border border-stone-950 text-left">
+                    Departamento
+                </th>
+                <th scope="col" class="px-6 py-3 border border-stone-950 text-left">
+                    Horario
+                </th>
+            </tr>
+        </thead>
+        <tbody >
+
+            @foreach (var employee in Model.Employees)
+            {
+                <tr class="bg-white ">
+                    <th scope="row" class="px-6 py-2 font-medium text-black-900 whitespace-nowrap uppercase border border-stone-950 text-left">
+                        @employee.EmployeeCode - @employee.FirstName @employee.LastName
+                    </th>
+                    <td class="px-6 py-2 border border-stone-950 text-left uppercase">
+                        @employee.Job
+                    </td>
+                    <td class="px-3 py-2 border border-stone-950 text-center">
+                        <!-- Modal toggle -->
+                        <button data-modal-target="authentication-modal-@employee.Id" data-modal-toggle="authentication-modal-@employee.Id" class="block w-full text-white bg-orange-400 hover:bg-orange-500 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-2.5 py-1.5 text-center" type="button">
+                            Horario
+                        </button>
+
+                        <!-- Main modal -->
+                        <div id="authentication-modal-@employee.Id" tabindex="-1" aria-hidden="true" class="fixed inset-0 z-40 hidden flex items-center justify-center">
+                            <div class="relative bg-white rounded-lg shadow white:bg-gray-700 w-100" style="width: 600px;">
+
+                                <!-- Modal content -->
+                                <div class="relative bg-white rounded-lg shadow white:bg-gray-700">
+
+                                    <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" data-modal-hide="authentication-modal-@employee.Id">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                        </svg>
+                                        <span class="sr-only">Close modal</span>
+                                    </button>
+                                    <!-- Full name box --> 
+                                    <form class="space-y-6" action="#">
+                                        <div class="content-between pt-3.5 px-6 lg:px-8 ">
+                                            <label for="email" class="items-center inline-flex block mb-2 text-sm font-medium text-gray-900 dark:text-black">
+                                                Nombre completo:
+                                                <input disabled id="name-@employee.Id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-400 focus:border-blue-400 block w-4/5 p-2 white:bg-black-600 dark:border-black-500 dark:placeholder-black-400 dark\:text-black " style="width: 370px; margin-left: 10px" value=" @employee.EmployeeCode - @employee.FirstName @employee.LastName ">
+                                            </label>
+                                            @* modal xd*@
+                                            <div id="inputsSchedules-@employee.EmployeeCode" class="grid grid-cols-4 gap-4 content-start bg-gray-300 rounded-lg pointer-events-none">
+                                                @*aqui empieza*@
+                                                @if (employee.Schedules.Where(s => s.Day.Name.Equals("Lunes")).FirstOrDefault() != null)
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input name="MondayDayValue-@employee.EmployeeCode" onclick="disableByCheckBoxMonday(@employee.EmployeeCode)" value="1" type="checkbox" checked class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Lunes</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px; padding-left: 26px;">Entrada</label>
+                                                        <input name="MondayCheckInTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Lunes")).FirstOrDefault().CheckInTime">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input name="MondayCheckOutTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Lunes")).FirstOrDefault().CheckOutTime">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input name="MondayDayValue-@employee.EmployeeCode"  value="1" onclick="disableByCheckBoxMonday(@employee.EmployeeCode)" type="checkbox" class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300    rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div> 
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Lunes</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px; padding-left: 26px;">Entrada</label>
+                                                        <input name="MondayCheckInTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input name="MondayCheckOutTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                    </div>
+                                                }
+                                                @*aqui termina lunes*@
+                                                @*aqui empieza martes*@
+                                                @if (employee.Schedules.Where(s => s.Day.Name.Equals("Martes")).FirstOrDefault() != null)
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input name="TuesdayDayValue-@employee.EmployeeCode" value="2" onclick="disableByCheckBoxTuesday(@employee.EmployeeCode)"  type="checkbox" checked class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Martes</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input name="TuesdayCheckInTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Martes")).FirstOrDefault().CheckInTime">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input name="TuesdayCheckOutTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Martes")).FirstOrDefault().CheckOutTime">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input  name="TuesdayDayValue-@employee.EmployeeCode" value="2" onclick="disableByCheckBoxTuesday(@employee.EmployeeCode)" type="checkbox" class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Martes</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-brack" style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input  name="TuesdayCheckInTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-brack" style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input  name="TuesdayCheckOutTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                    </div>
+                                                }
+                                                @*aqui termina martes*@
+                                                @*aqui empieza miercoles*@
+                                                @if (employee.Schedules.Where(s => s.Day.Name.Equals("Miercoles")).FirstOrDefault() != null)
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input  name="WednesdayDayValue-@employee.EmployeeCode" value="3" onclick="disableByCheckBoxWednesday(@employee.EmployeeCode)"  type="checkbox" checked class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Miercoles</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input  name="WednesdayCheckInTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Miercoles")).FirstOrDefault().CheckInTime">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input  name="WednesdayCheckOutTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Miercoles")).FirstOrDefault().CheckOutTime">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input  name="WednesdayDayValue-@employee.EmployeeCode" value="3" onclick="disableByCheckBoxWednesday(@employee.EmployeeCode)" type="checkbox" class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Miercoles</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900 " style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input  name="WednesdayCheckInTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900 " style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input  name="WednesdayCheckOutTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                    </div>
+                                                }
+                                                @*aqui termina miercoles*@
+                                                @*aqui empieza jueves*@
+                                                @if (employee.Schedules.Where(s => s.Day.Name.Equals("Jueves")).FirstOrDefault() != null)
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input  name="ThursdayDayValue-@employee.EmployeeCode" value="4" onclick="disableByCheckBoxThursday(@employee.EmployeeCode)"  type="checkbox" checked class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Jueves</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input  name="ThursdayCheckInTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Jueves")).FirstOrDefault().CheckInTime">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px; padding-left: 26px;">Salida</label>
+                                                        <input  name="ThursdayCheckOutTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Jueves")).FirstOrDefault().CheckOutTime">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input  name="ThursdayDayValue-@employee.EmployeeCode" value="4" onclick="disableByCheckBoxThursday(@employee.EmployeeCode)" type="checkbox" class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Jueves</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900 " style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input  name="ThursdayCheckInTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900 " style="margin-right: 10px; padding-left: 26px;">Salida</label>
+                                                        <input  name="ThursdayCheckOutTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                    </div>
+                                                }
+                                                @*aqui termina jueves*@
+                                                @*aqui empieza viernes*@
+                                                @if (employee.Schedules.Where(s => s.Day.Name.Equals("Viernes")).FirstOrDefault() != null)
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input name="FridayDayValue-@employee.EmployeeCode" value="5" onclick="disableByCheckBoxFriday(@employee.EmployeeCode)"  type="checkbox" checked class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Viernes</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input name="FridayCheckInTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Viernes")).FirstOrDefault().CheckInTime">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input name="FridayCheckOutTime-@employee.EmployeeCode"  type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;" value="@employee.Schedules.Where(s => s.Day.Name.Equals("Viernes")).FirstOrDefault().CheckOutTime">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="p-3">
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input  name="FridayDayValue-@employee.EmployeeCode" value="5" onclick="disableByCheckBoxFriday(@employee.EmployeeCode)" type="checkbox" class="sr-only peer">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
+                         after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all white:border-gray-600 peer-checked:bg-orange-400">
+                                                            </div>
+                                                            <span class="ml-3 text-sm font-medium text-gray-900 ">Viernes</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-span-3 inline-flex flex-nowrap" style="padding-top: 14px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Entrada</label>
+                                                        <input  name="FridayCheckInTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                        <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900" style="margin-right: 10px;  padding-left: 26px;">Salida</label>
+                                                        <input  name="FridayCheckOutTime-@employee.EmployeeCode" type="time" id="small-input" class="block w-52 h-7 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500" style="  width: 110px;   margin-right: 10px;">
+                                                    </div>
+                                                }
+                                                @*aqui termina viernes*@
+                                            </div>
+
+                                        </div>
+                                        <!-- Toggle  -->
+                                        
+                                       
+                                        
+                                            <div class="flex justify-center">
+                                            <button id="btnUpdate-@employee.EmployeeCode" type="button" onclick="enableInputsSchedules(@employee.EmployeeCode)" class="w-1/3  focus:outline-none text-white bg-orange-800 hover:bg-orange-900 focus:ring-4 focus:ring-orange-700 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2" style="margin-bottom: 15px;margin-left: 10px;">
+                                                    Editar
+                                                </button>
+                                            <button id="btnSave-@employee.EmployeeCode" type="button" onclick="SendSchedules(@employee.EmployeeCode), disableInputsSchedules(@employee.EmployeeCode)" class="w-1/3 cursor-no-drop  text-white bg-orange-400 hover:bg-orange-500 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center " style="margin-bottom: 15px;margin-left: 10px;">
+                                                    Guardar
+                                                </button>
+                                            </div>
+                                        
+
+                                        <!-- accept button -->
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="flex flex-col mt-10 items-center">
+        <!-- Help text -->
+        <span class="text-sm text-gray-700 dark:text-gray-400">
+            Mostrando <span id="page" class="font-semibold text-gray-900 dark:text-white">@Model.Pagination.Page </span> de <span id="totalPages" class="font-semibold text-gray-900 dark:text-white">@Model.Pagination.TotalPages</span> de <span class="font-semibold text-gray-900 dark:text-white">@Model.Pagination.TotalRecords</span> Empleados
+        </span>
+        <div class="inline-flex mt-2 xs:mt-0">
+            <!-- Buttons -->
+            <input name="Page" style="display:none" value="@Model.Pagination.Page" />
+            <button onclick="lessPagination()" type="submit" id="btnPreview" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white rounded-l-lg  hover:bg-orange-600">
+                <svg class="w-3.5 h-3.5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4" />
+                </svg>
+                Anterior
+            </button>
+
+            <input name="Page" style="display:none" value="@Model.Pagination.Page" />
+            <button onclick="addPagination()" id="btnNext" type="submit" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white rounded-r-lg bg-orange-500 hover:bg-orange-600">
+                Siguiente
+                <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                </svg>
+            </button>
+
+        </div>
+    </div>
+
+
+
+}
+else
+{
+    <div class="content-center flex justify-center">
+        <label class="text-4xl text-gray-900">No se encontraron resultados</label>
+    </div>
+}
+
+
+    <script>
+
+            function disableInputsSchedules(employeeCode)
+            {
+                const divSchedules = document.getElementById('inputsSchedules-' + employeeCode)
+
+                divSchedules.classList.add('pointer-events-none');
+                divSchedules.classList.add('bg-gray-300');
+
+                const btnSendSchedules = document.getElementById('btnSave-' + employeeCode);
+                const btnUpdateSchedules = document.getElementById('btnUpdate-' + employeeCode);
+
+                btnSendSchedules.classList.add('cursor-no-drop');
+                btnSendSchedules.disabled = true;
+
+                btnUpdateSchedules.classList.remove('cursor-no-drop');
+                btnUpdateSchedules.disabled = false;
+
+            }
+
+            function enableInputsSchedules(employeeCode)
+            {
+                const divSchedules = document.getElementById('inputsSchedules-' + employeeCode)
+
+                divSchedules.classList.remove('pointer-events-none');
+                divSchedules.classList.remove('bg-gray-300');
+
+                const btnSendSchedules = document.getElementById('btnSave-' + employeeCode);
+                const btnUpdateSchedules = document.getElementById('btnUpdate-' + employeeCode);
+
+                btnSendSchedules.classList.remove('cursor-no-drop');
+                btnSendSchedules.disabled = false;
+                btnUpdateSchedules.classList.add('cursor-no-drop');
+                btnUpdateSchedules.disabled = true;
+
+            }
+
+
+
+            // Function to show the modal
+            function showModal(modalId) {
+                const modalContainer = document.getElementById(modalId);
+                modalContainer.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling when the modal is open
+                var form = document.getElementById(modalId);
+            }
+
+
+            // Function to hide the modal
+            function hideModal(modalId) {
+                const modalContainer = document.getElementById(modalId);
+                modalContainer.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Allow scrolling when the modal is closed
+            }
+
+            initializerPage();
+
+        function initializerPage()
+        {
+            // Add click event listeners to all modal toggle buttons
+            const modalToggleButtons = document.querySelectorAll('[data-modal-toggle]');
+            modalToggleButtons.forEach(button => {
+                const targetModalId = button.getAttribute('data-modal-toggle');
+                button.addEventListener('click', () => showModal(targetModalId));
+            });
+
+            // Add click event listeners to all modal hide buttons
+            const modalHideButtons = document.querySelectorAll('[data-modal-hide]');
+            modalHideButtons.forEach(button => {
+                const targetModalId = button.getAttribute('data-modal-hide');
+                button.addEventListener('click', () => hideModal(targetModalId));
+            });
+
+
+        const pag = document.getElementById('page');
+        const totalpag = document.getElementById('totalPages');
+
+
+        if (pag.textContent == 1) {
+            const btnPreview = document.getElementById('btnPreview')
+            btnPreview.disabled = true;
+            btnPreview.classList.remove('bg-orange-500');
+            btnPreview.classList.remove('hover:bg-orange-600');
+            btnPreview.classList.add('bg-amber-900');
+
+        } else {
+            const btnPreview = document.getElementById('btnPreview')
+            btnPreview.classList.add('bg-orange-500');
+            btnPreview.classList.add('hover:bg-orange-600');
+            btnPreview.classList.remove('bg-amber-900');
+            btnPreview.disabled = false;
+        }
+
+        if (pag.textContent.match(totalpag.textContent)) {
+            const btnNext = document.getElementById('btnNext')
+            btnNext.disabled = true;
+            btnNext.classList.remove('bg-orange-500');
+            btnNext.classList.remove('hover:bg-orange-600');
+            btnNext.classList.add('bg-amber-900');
+        }
+        else {
+            const btnNext = document.getElementById('btnNext')
+            btnNext.classList.add('bg-orange-500');
+            btnNext.classList.add('hover:bg-orange-600');
+            btnNext.classList.remove('bg-amber-900');
+            btnNext.disabled = false;
+        }
+        }
+    </script>

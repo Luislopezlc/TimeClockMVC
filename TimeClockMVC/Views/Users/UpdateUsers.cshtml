@@ -1,0 +1,185 @@
+﻿@model TimeClockMVC.Models.UpdateUserViewModel
+
+<section>
+    <div class="max-w-4xl px-4 py-8 mx-auto lg:py-16">
+        <h2 class="mb-4 text-xl font-bold text-gray-900">Editar Usuarios</h2>
+        <form class="space-y-6" action="#">
+            <div class="flex flex-wrap -mx-2">
+                <div id="container_user" class="w-full md:w-1/2 px-2 mb-4">
+                    <label for="text" class="block mb-2 text-sm font-medium">Id</label>
+                    <input type="text" name="id" id="id_user" class="bg-gray-50 border border-orange-300 text-gray-900 text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5" placeholder="1" required>
+                </div>
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <label for="text" class="block mb-2 text-sm font-medium">Nombre/s</label>
+                    <input type="text" name="name" id="name_user" class="bg-gray-50 border border-orange-300 text-gray-900 text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5" placeholder="Manuel Alejandro" required>
+                </div>
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <label for="text" class="block mb-2 text-sm font-medium">Apellido/s</label>
+                    <input type="text" name="name" id="lastname_user" class="bg-gray-50 border border-orange-300 text-gray-900 text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5" placeholder="Flores Barrera" required>
+                </div>
+                <!--Espacio para generar un salto en el form-->
+                <div class="w-full md:w-1/2 px-2 mb-4"></div>
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <label for="text" class="block mb-2 text-sm font-medium">AreaId</label>
+                    <input type="text" name="name" id="areaid_user" class="bg-gray-50 border border-orange-300 text-gray-900 text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5" placeholder="Administración" required>
+                </div>
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <label for="text" class="block mb-2 text-sm font-medium">Código de area</label>
+                    <input type="text" name="name" id="area_user" class="bg-gray-50 border border-orange-300 text-gray-900 text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5" placeholder="Administración" required>
+                </div>
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <label for="text" class="block mb-2 text-sm font-medium">Código de puesto</label>
+                    <input type="text" name="name" id="position_user" class="bg-gray-50 border border-orange-300 text-gray-900 text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5" placeholder="Puesto1" required>
+                </div>
+                <div class="w-full md:w-1/2 px-2">
+                    <label for="text" class="block mb-2 text-sm font-medium text-gray-900">Jefe</label>
+                    <input type="text" name="name" id="boss_user" class="bg-gray-50 border border-orange-300 text-gray-900 text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5" placeholder="Jefe1" required>
+                </div>
+
+            </div>
+            <div class="flex justify-end p-6 space-x-2 rounded-b">
+                <button onclick="SaveUser()"
+                        type="button"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    Guardar
+                </button>
+            </div>
+        </form>
+        <div id="areausers"></div>
+    </div>
+</section>
+
+@section Scripts{
+    <script>
+
+        function LoadAreasUser(Id, Area, Position, IsLeader) {
+            document.getElementById('areaid_user').value = Id;
+            document.getElementById('area_user').value = Area;
+            document.getElementById('position_user').value = Position;
+            document.getElementById('boss_user').value = IsLeader;
+        }
+        LoadUser();
+        function LoadUser() {
+            var empcode = "@Model.Empcode";
+
+            var token = "@Context.Session.GetString("Token")";
+            //console.log(token.trim())
+
+            var urlBase = "@Model.UrlApi";
+            // console.log(urlBase);
+
+            console.log("si jalo");
+
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat(`Users/GetUserByEmpCode?empCode=${empcode}`),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    document.getElementById('id_user').value = data.payload.id;
+                    document.getElementById('name_user').value = data.payload.firstName;
+                    document.getElementById('lastname_user').value = data.payload.lastName;
+                    PartialViewAreaUsersTable(data.payload);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status == 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+        function SaveUser() {
+
+            var model =
+            {
+                EmployeeCode: document.getElementById('id_user').value,
+                FirstName: document.getElementById('name_user').value,
+                LastName: document.getElementById('lastname_user').value,
+                AreaCode: document.getElementById('area_user').value,
+                AreasUserId: document.getElementById('areaid_user').value,
+                PositionCode: document.getElementById('position_user').value,
+                IsLeaderArea: (document.getElementById('boss_user').value === 'true')
+            };
+
+            if (model.Id === "") {
+                model.Id = 0;
+            }
+
+            if (model.AreasUserId === "") {
+                model.AreasUserId = 0;
+            }
+
+
+            $.ajax({
+                type: "PUT",
+                url: urlBase.concat(`Users/UpdateUser`),
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                data: JSON.stringify(model),
+                success: function (data) {
+                    SuccessfulMessage("Se han guardo los cambios del usuario con Id: " + data.payload.id)
+                    LoadUser();
+
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status == 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+        function PartialViewAreaUsersTable(areauserData) {
+
+
+            $.ajax({
+                type: "POST",
+                url: "/Users/AreaUsersTable",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(areauserData),
+                success: function (data) {
+                    $("#areausers").empty();
+                    $("#areausers").append(data);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error);
+                }
+            });
+        }
+
+    </script>
+}

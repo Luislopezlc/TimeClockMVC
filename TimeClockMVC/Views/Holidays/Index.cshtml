@@ -1,0 +1,163 @@
+﻿@model TimeClockMVC.Models.HolidaysViewModel
+
+
+<div class="container mx-auto mt-10">
+    <h1 class="h1 text-2xl font-semibold">Dias Inhabiles</h1>
+    <div class="w-full bg-neutral-200 h-0.5 mt-1 mb-3"></div>
+    <div class="flex justify-between mb-3">
+        <form class="w-3/12">
+            <label for="default-search"
+                   class="mb-2 text-sm font-medium text-gray-900 sr-only">Buscar</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500"
+                         aria-hidden="true"
+                         xmlns="http://www.w3.org/2000/svg"
+                         fill="none"
+                         viewBox="0 0 20 20">
+                        <path stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                    </svg>
+                </div>
+                <input type="search"
+                       id="Destiny"
+                       class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500"
+                       placeholder="Buscar Dia"
+                        />
+                <button type="button"
+                        onclick="GetHolidays(1)"
+                        class="text-white absolute right-2.5 bottom-2.5 bg-orange-700 hover:bg-orange-800 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-4 py-2">
+                    Buscar
+                </button>
+            </div>
+        </form>
+        <button onclick="OpenModal()"
+                type="button"
+                class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">
+            Agregar
+        </button>
+    </div>
+
+    <div id="holidaysTables">
+
+    </div>
+   
+</div>
+@section Scripts{
+     
+    <script>
+
+    var token = "@Context.Session.GetString("Token")";
+
+    var urlBase = "@Model.UrlApi";
+
+     GetHolidays(1);
+        function GetHolidays(page) {
+
+             var model =
+            {
+                Pagination:
+                {
+                    Page: page,
+                    RecordsForPage: 10,
+                },
+                Search: document.getElementById('Destiny').value
+            };
+
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat(`Holidays/GetHolidays?Pagination.Page=${model.Pagination.Page}&Pagination.RecordsForPage=${model.Pagination.RecordsForPage}&Search=${model.Search}`),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    PartialViewHolidayTable(data);
+                },
+                error: function (error) {
+                   // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status == 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+
+        function PartialViewHolidayTable(holidaysData) {
+
+            var model = {
+                Holidays: holidaysData.payload.holidays,
+                Pagination: holidaysData.payload.pagination
+            }
+
+
+            $.ajax({
+                type: "POST",
+                url: "/Holidays/HolidaysTable",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(model),
+                success: function (data) {
+                    $("#holidaysTables").empty();
+                    $("#holidaysTables").append(data);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $("#Destiny").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        type: "GET",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        headers: {
+                            "Authorization": `Bearer ${token.trim()}`  // Reemplaza "tu_token_aqui" con el token real
+                        },
+                        url: urlBase.concat(`Holidays/ByDay/${request.term}`),
+                        success: function (data) {
+                            response(data.payload)
+                        },
+                        error: function (error) {
+                            // Manejar errores en caso de que la solicitud falle
+                            if (error.status == 401) {
+                                openModalunauthorized();
+                            }
+                            else {
+                                //obtenemos las propiedades del objeto errors
+                                const errorKeys = Object.keys(error.responseJSON.errors);
+                                //obtenemos el nombre de la primera propiedad
+                                const firstProperty = errorKeys[0];
+                                //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                                const firstError = error.responseJSON.errors[firstProperty];
+
+                                errorMessage(firstError);
+                            }
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+}

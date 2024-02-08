@@ -1,0 +1,160 @@
+﻿@model TimeClockMVC.Models.IncidentReportsViewModel
+
+@if (Model != null && Model.Employees != null && Model.Employees.Any())
+{
+    <div class="block m-4 p-4 w-full" style="margin-left: 0px;">
+        <table class="w-full">
+            <thead>
+                <tr class="border border-stone-950">
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Empleados</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Faltas</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Fechas faltas</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Fechas faltas antes de la hora de salida</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Retardos menores</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Fechas retardos menores</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Retardos mayores</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Fechas retardos mayores</th>
+                    <th class="bg-orange-500 text-md text-white px-6 py-3 border-2 border-stone-950">Total de descuentos</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm border-2 border-stone-950">
+                @foreach (var employee in Model.Employees)
+                {
+                    <tr class="text-center border border-stone-950">
+                        <td class="border-2 border-stone-950">@employee.FullName</td>
+                        <td class="border-2 border-stone-950">@employee.Absences</td>
+                        <td class="border-2 border-stone-950 whitespace-nowrap">
+                            @foreach (var absenceDate in employee.AbsenceDates)
+                            {
+                                <p>@absenceDate</p>
+                            }
+                        </td>
+                        <td class="border-2 border-stone-950 whitespace-nowrap">
+                            @foreach (var AbsenceDate2 in employee.AbsenceDatesWithoutExit)
+                            {
+                                <p>@AbsenceDate2</p>
+                            }
+                        </td>
+                        <td class="border-2 border-stone-950">
+                            <p>@employee.MinorDelays</p>
+                        </td>
+                        <td class="border-2 border-stone-950 whitespace-nowrap">
+                            @foreach (var minorDelayDate in employee.MinorDelayDates)
+                            {
+                                <p>@minorDelayDate</p>
+                            }
+                        </td>
+                        <td class="border-2 border-stone-950">@employee.LongerDelays</td>
+                        <td class="border-2 border-stone-950 whitespace-nowrap">
+                            @foreach (var longerDelayDates in employee.LongerDelaysDates)
+                            {
+                                <p>@longerDelayDates</p>
+                            }
+                        </td>
+                        <td class="border-2 border-stone-950">@employee.TotalIncidents</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex flex-col mt-10 items-center">
+        <!-- Help text -->
+        <span class="text-sm text-gray-700 dark:text-gray-400">
+            Mostrando <span id="page" class="font-semibold text-gray-900 dark:text-white">@Model.Pagination.Page </span> de <span id="totalPages" class="font-semibold text-gray-900 dark:text-white">@Model.Pagination.TotalPages</span> de <span class="font-semibold text-gray-900 dark:text-white">@Model.Pagination.TotalRecords</span> registros
+        </span>
+        <div class="inline-flex mt-2 xs:mt-0">
+            <!-- Buttons -->
+            <input name="Page" style="display:none" value="@Model.Pagination.Page" />
+            <button onclick="lessPagination()" type="submit" id="btnPreview" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white rounded-l-lg  hover:bg-orange-600">
+                <svg class="w-3.5 h-3.5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4" />
+                </svg>
+                Anterior
+            </button>
+
+            <input name="Page" style="display:none" value="@Model.Pagination.Page" />
+            <button onclick="addPagination()" id="btnNext" type="submit" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white rounded-r-lg bg-orange-500 hover:bg-orange-600">
+                Siguiente
+                <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                </svg>
+            </button>
+
+        </div>
+    </div>
+  <script>
+        initializerPage();
+
+        function initializerPage() {
+
+            const pag = document.getElementById('page');
+            const totalpag = document.getElementById('totalPages');
+
+
+            if (pag.textContent == 1) {
+                const btnPreview = document.getElementById('btnPreview')
+                btnPreview.disabled = true;
+                btnPreview.classList.remove('bg-orange-500');
+                btnPreview.classList.remove('hover:bg-orange-600');
+                btnPreview.classList.add('bg-amber-900');
+
+            } else {
+                const btnPreview = document.getElementById('btnPreview')
+                btnPreview.classList.add('bg-orange-500');
+                btnPreview.classList.add('hover:bg-orange-600');
+                btnPreview.classList.remove('bg-amber-900');
+                btnPreview.disabled = false;
+            }
+
+            if (pag.textContent.match(totalpag.textContent)) {
+                const btnNext = document.getElementById('btnNext')
+                btnNext.disabled = true;
+                btnNext.classList.remove('bg-orange-500');
+                btnNext.classList.remove('hover:bg-orange-600');
+                btnNext.classList.add('bg-amber-900');
+            }
+            else {
+                const btnNext = document.getElementById('btnNext')
+                btnNext.classList.add('bg-orange-500');
+                btnNext.classList.add('hover:bg-orange-600');
+                btnNext.classList.remove('bg-amber-900');
+                btnNext.disabled = false;
+            }
+        }
+  </script>
+}
+else
+{
+    <div class="content-center flex justify-center mt-5">
+        <label class="text-4xl text-gray-900">Genera un reporte de incidencias</label>
+    </div>
+}
+
+<script>
+   
+
+    function addPagination() {
+        const pag = document.getElementById('page');
+        const totalpag = document.getElementById('totalPages');
+        var pageCurrent = pag.textContent;
+
+        var pagNext = parseInt(pageCurrent) + 1;
+        document.getElementById('page').textContent = pagNext;
+        console.log(pagNext)
+        GetIncidentReport(pagNext);
+       
+    }
+
+    function lessPagination() {
+        const pag = document.getElementById('page');
+        const totalpag = document.getElementById('totalPages');
+        var pageCurrent = pag.textContent;
+
+        var pagNext = parseInt(pageCurrent) - 1;
+        document.getElementById('page').textContent = pagNext;
+        console.log(pagNext)
+        GetIncidentReport(pagNext);
+
+    }
+</script>

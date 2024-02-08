@@ -1,0 +1,315 @@
+﻿@model TimeClockMVC.Models.PositionViewModel
+
+
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Id
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Nombre
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Código
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        <span class="sr-only">Editar</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.positions != null && Model.positions.Any())
+            {
+                @foreach (var position in Model.positions)
+                {
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            @position.Id
+                        </th>
+                        <td class="px-6 py-4">
+                            @position.Name
+                        </td>
+                        <td class="px-6 py-4">
+                            @position.Code
+                        </td>
+                        <td class="px-6 py-4">
+                            <button onclick="LoadPositionOnModal(@position.Id)" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                                Editar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+        </table>
+
+        <!-- Main modal -->
+    <div id="positionModal" tabindex="-1" aria-hidden="true" class="fixed inset-0 z-40 hidden flex items-center justify-center">
+            <div class="relative w-full max-w-md max-h-full">
+                <!-- Modal content -->
+                <div class="relative bg-white rounded-lg shadow ">
+                <button onclick="CloseModal()" type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" data-modal-hide="authentication-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                    <div class="px-6 py-6 lg:px-8">
+                        <h3 class="mb-4 text-xl font-medium text-gray-900 ">Insertar puestos</h3>
+                        <form class="space-y-6" action="#">
+                        <div id="container_position">
+                            <label for="text" class="block mb-2 text-sm font-medium text-gray-900">ID</label>
+                            <input disabled type="text" name="name" id="id_position" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        </div>
+                        <div>
+                            <label for="text" class="block mb-2 text-sm font-medium text-gray-900">Nombre</label>
+                            <input  type="text" name="name" id="name_position" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Profesor de asignatura" required>
+                        </div>
+                        <div>
+                            <label for="text" class="block mb-2 text-sm font-medium text-gray-900">Código</label>
+                            <input type="text" name="code" id="code_position" placeholder="PA" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 00" required>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-start">
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b">
+                    <button onclick="SavePosition()"
+                            type="button"
+                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        Guardar
+                    </button>
+                    <button onclick="OpenModalDeletePosition()"
+                            class="block text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                            type="button">
+                        Eliminar
+                    </button>
+                    <div id="positionsDelete"
+                         tabindex="-1"
+                         class="fixed inset-0 z-40 hidden flex items-center justify-center">
+                        <div class="relative w-full max-w-md max-h-full">
+                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                <button type="button" onclick="CloseModalDeletePosition()"
+                                        class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                        data-modal-hide="popup-modal">
+                                    <svg class="w-3 h-3"
+                                         aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         fill="none"
+                                         viewBox="0 0 14 14">
+                                        <path stroke="currentColor"
+                                              stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                    </svg>
+                                    <span class="sr-only">Close modal</span>
+                                </button>
+                                <div class="p-6 text-center">
+                                    <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+                                         aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         fill="none"
+                                         viewBox="0 0 20 20">
+                                        <path stroke="currentColor"
+                                              stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                                        ¿Estas seguro que quires eliminar este?
+                                    </h3>
+                                    <input id="deletePosition" class="hidden" />
+                                    <button 
+                                            type="button"
+                                            onclick="DeletePositionById()"
+                                            class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                                        Si, estoy seguro
+                                    </button>
+                                    <button onclick="CloseModalDeletePosition()"
+                                            type="button"
+                                            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                                        No, cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+
+<script>
+    console.log("si");
+    function OpenModal()
+    {
+        var modal = document.getElementById('positionModal');
+        modal.classList.remove('hidden');
+        document.getElementById('name_position').value = "";
+        document.getElementById('code_position').value = "";
+        document.getElementById('id_position').value = "";
+
+        document.getElementById('container_position').classList.add('hidden');
+
+    }
+
+    function CloseModal() {
+        var modal = document.getElementById('positionModal');
+        modal.classList.add('hidden');
+    }
+
+
+    function OpenModalDeletePosition()
+    {
+            var modal = document.getElementById('positionsDelete');
+            modal.classList.remove('hidden');
+    }
+
+    function CloseModalDeletePosition() {
+            var modal = document.getElementById('positionsDelete');
+        modal.classList.add('hidden');
+    }
+
+    function DeletePositionById()
+    {
+        var id = document.getElementById('deletePosition').value;
+
+        $.ajax({
+            type: "DELETE",
+            url: urlBase.concat(`BusinessStructure/DeletePosition/${id}`),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "Authorization": `Bearer ${token.trim()}`
+            },
+            success: function (data) {
+                CloseModal();
+                CloseModalDeletePosition();
+                SuccessfulMessage("Se eliminado el puesto con id: " + id)
+                GetPositions(1);
+
+            },
+            error: function (error) {
+                // Manejar errores en caso de que la solicitud falle
+                console.log(error)
+
+                if (error.status == 401) {
+                    openModalunauthorized();
+                }
+                else {
+                    //obtenemos las propiedades del objeto errors
+                    const errorKeys = Object.keys(error.responseJSON.errors);
+                    //obtenemos el nombre de la primera propiedad
+                    const firstProperty = errorKeys[0];
+                    //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                    const firstError = error.responseJSON.errors[firstProperty];
+
+                    errorMessage(firstError);
+                }
+            }
+        });
+    }
+
+    function LoadPositionOnModal(id)
+    {
+        OpenModal();
+        document.getElementById('deletePosition').value = id;
+        document.getElementById('container_position').classList.remove('hidden');
+
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat(`BusinessStructure/GetPosition/${id}`),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    document.getElementById('id_position').value = data.payload.id;
+                    document.getElementById('name_position').value = data.payload.name;
+                    document.getElementById('code_position').value = data.payload.positionCode;
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status == 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        
+    }
+
+
+
+    function SavePosition()
+    {
+
+        var model = 
+        {
+            Id: document.getElementById('id_position').value,
+            Name: document.getElementById('name_position').value,
+            Code: document.getElementById('code_position').value
+        };
+
+        if(model.Id === "")
+        {
+           model.Id = 0;
+        }
+
+      
+            $.ajax({
+                type: "POST",
+                url: urlBase.concat(`BusinessStructure/PostPosition`),
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },  
+                data: JSON.stringify(model),
+                success: function (data) {
+                    SuccessfulMessage("Se han guardo los cambios del puesto con Id: " + data.payload.id)
+                    GetPositions(1);
+                    CloseModal();
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status == 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+    }
+
+</script>

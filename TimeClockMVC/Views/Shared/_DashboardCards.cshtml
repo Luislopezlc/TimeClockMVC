@@ -1,0 +1,43 @@
+﻿@model TimeClockMVC.Models.IncidentsTodayViewModel
+
+
+
+<div class="w-2/5 border border-gray-50 shadow-2xl px-10 py-10">
+    <h3 class="font-bold text-xl mb-3">Empleados próximos a llegar</h3>
+    <div class="overflow-y-scroll max-h-60 p-7">
+        @if (Model.Employee != null && Model.Employee.Any())
+        {
+            @foreach (var upcomingEmployee in Model.Employee)
+            {
+                <div class="flex justify-between my-2">
+                    <p class="pr-20">@upcomingEmployee.EmployeeCode - @upcomingEmployee.FirstName @upcomingEmployee.LastName</p>
+                    <p>@upcomingEmployee.Schedules[0].CheckInTime</p>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="w-2/5 border border-gray-50 shadow-2xl px-10 py-10">
+    <h3 class="font-bold text-xl mb-3">Incidencias del dia</h3>
+    <div class="overflow-y-scroll max-h-60 p-7">
+        @if (Model.IncidentsToday != null && Model.IncidentsToday.Any())
+        {
+            @foreach (var incidentToday in Model.IncidentsToday)
+            {
+                <div class="flex justify-between">
+                    <p class="pr-20">@incidentToday.Employee</p>
+                    @if (incidentToday.Type == "A")
+                    {
+                        <p  class="text-red-500 font-medium"> Falta </p>
+                    }
+                    @if (incidentToday.Type == "D")
+                    {
+                        <p class="text-yellow-500 font-medium"> Retardo </p>
+                    }
+                </div>
+            }
+        }
+
+    </div>
+</div>

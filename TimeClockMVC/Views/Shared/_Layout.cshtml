@@ -1,0 +1,443 @@
+﻿@using System.Text.Json;
+@using TimeClockMVC.Domain.Models;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UPQROO</title>
+    <link rel="icon" type="image/png" href="https://upqroo.edu.mx/wp-content/uploads/2022/03/LogoPaginaWeb-150x150.png" sizes="32x32" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TimeClockMVC.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+</head>
+<body>
+    <header>
+        <nav id="navbar" class="flex justify-between bg-white-300 px-4 shadow-md">
+            <button id="btnSidebarToggler" type="button" class="py-4 text-2xl text-black hover:text-black-800">
+                <svg id="navClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="h-8 w-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <svg id="navOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="hidden h-8 w-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <a href="/Home/Index">
+            <img class="flex object-left ml-4" src="~/img/upqroo_logo.png" alt="logo" style="width: 207px; margin: 7px;" />
+
+            </a>
+
+            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" type="button">
+                <img style="width:45px; height:35px;" src="https://cdn-icons-png.flaticon.com/512/10320/10320293.png" />
+            </button>
+            <!-- Dropdown menu -->
+            <!-- Agrega el siguiente script en el head o antes de la etiqueta de cierre </body> -->
+            <script>
+                // Esperar a que el DOM esté cargado
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Obtener referencias a los elementos del DOM
+                    const dropdownButton = document.getElementById('dropdownDefaultButton');
+                    const dropdownMenu = document.getElementById('dropdown');
+
+                    // Función para alternar la visibilidad del menú desplegable
+                    function toggleDropdown() {
+                        dropdownMenu.classList.toggle('hidden');
+                    }
+
+                    // Evento clic en el botón para desplegar el menú
+                    dropdownButton.addEventListener('click', function (event) {
+                        event.stopPropagation(); // Detener la propagación del evento clic para evitar que se cierre inmediatamente el menú
+                        toggleDropdown();
+                    });
+
+                    // Evento clic fuera del menú para cerrarlo
+                    document.addEventListener('click', function (event) {
+                        const target = event.target;
+                        if (!dropdownMenu.contains(target) && !dropdownButton.contains(target)) {
+                            dropdownMenu.classList.add('hidden');
+                        }
+                    });
+
+                    // Evento tecla Escape para cerrar el menú
+                    document.addEventListener('keyup', function (event) {
+                        if (event.key === 'Escape') {
+                            dropdownMenu.classList.add('hidden');
+                        }
+                    });
+                });
+            </script>
+
+
+        </nav>
+        <div id="dropdown" class="border border-orange-600 z-10 hidden bg-white  rounded-lg shadow w-44" style="margin-left: 88.6%; position: absolute;">
+            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                @if (!string.IsNullOrEmpty(Context.Session.GetString("User")))
+                {
+                    string userDto = Context.Session.GetString("User");
+                    var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                    var userData = JsonSerializer.Deserialize<UserDto>(userDto, options);
+
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-black hover:bg-gray-100 hover:bg-orange-300">@userData.Rol</a>
+                    </li>
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-black hover:bg-gray-100 hover:bg-orange-300">@userData.FirstName</a>
+                    </li>
+                    <a href="#" onclick="openModal()" class="block px-4 py-2 text-black hover:bg-gray-100 hover:bg-orange-300">Cerrar sesión</a>
+
+                    <li>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-black hover:bg-gray-100 hover:bg-orange-300">Rol</a>
+                    </li>
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-black hover:bg-gray-100 hover:bg-orange-300">Usuario</a>
+                    </li>
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-black hover:bg-gray-100 hover:bg-orange-300">Cerrar sesión</a>
+                    </li>
+                }
+
+            </ul>
+        </div>
+        <div id="containerSidebar" class="z-40">
+            <div class="navbar-menu relative z-40">
+                <nav id="sidebar"
+                     class="fixed left-0 bottom-0 flex w-3/4 -translate-x-full flex-col overflow-y-auto bg-orange-500 pt-6 pb-8 sm:max-w-xs lg:w-80">
+                    <div class="px-4 pb-6">
+                        <a class="text-white flex items-center rounded py-3 pl-3 pr-4 mb-6 hover:bg-orange-400"
+                           href="/Home/Index">
+                            <p class="select-none"> Dashboard</p>
+
+                        </a>
+                        @if (!string.IsNullOrEmpty(Context.Session.GetString("Sidebar")))
+                        {
+                            string sidebarJson = Context.Session.GetString("Sidebar");
+                            var options = new JsonSerializerOptions
+                            {
+                                WriteIndented = true,
+                                PropertyNameCaseInsensitive = true
+                            };
+                            var sidebar = JsonSerializer.Deserialize<List<SidebarDto>>(sidebarJson, options);
+
+                            foreach (var title in sidebar)
+                            {
+                                <h3 class="text-white mb-6 text-xl font-light uppercase text-white-400">
+                                    @title.Name
+                                </h3>
+                                <ul class="mb-8 text-sm font-medium">
+
+                                    @foreach (var secundary in title.SidebarSecondaries)
+                                    {
+
+                                        <li>
+                                            <a class="text-white flex items-center rounded py-3 pl-3 pr-4 mb-2 text-white-50 hover:bg-orange-400"
+                                   asp-controller="@secundary.Controller" asp-action="@secundary.Action">
+                                                <p class="select-none">@secundary.Name</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+
+                            }
+                        }
+                    </div>
+                </nav>
+            </div>
+            <div class="mx-auto lg:ml-80"></div>
+        </div>
+
+    </header>
+
+    <style>
+        ul.breadcrumb li + li::before {
+            content: "\276F";
+            padding-left: 8px;
+            padding-right: 4px;
+            color: inherit;
+        }
+
+        ul.breadcrumb li span {
+            opacity: 60%;
+        }
+
+        #sidebar {
+            -webkit-transition: all 300ms cubic-bezier(0, 0.77, 0.58, 1);
+            transition: all 300ms cubic-bezier(0, 0.77, 0.58, 1);
+        }
+
+            #sidebar.show {
+                transform: translateX(0);
+            }
+
+            #sidebar ul li a.active {
+                background: #1f2937;
+                background-color: orange;
+            }
+    </style>
+
+    <div id="signoff-modal" tabindex="-1" class="fixed inset-0 flex items-center justify-center z-50  hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full ">
+        <div class="relative w-full max-w-md max-h-full shadow-2xl">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button onclick="closeModal()" type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="signoff-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+                <div class="p-6 text-center">
+                    <svg class="mx-auto mb-4 text-yellow-600 w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal text-gray-500">Seguro que deseas cerrar sesión?</h3>
+                    <p class="text-sm text-gray-400 mb-5">
+                        Si deseas salir haz clic en Cerrar sesión o en Cancelar para continuar trabajando
+                    </p>
+                    <form class="inline mr-6" asp-controller="Accounts" asp-action="Logout" method="post">
+                        <button type="submit" data-modal-hide="signoff-modal" class=" text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                            Cerrar sesión
+                        </button>
+                    </form>
+                    <button onclick="closeModal()" data-modal-hide="signoff-modal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="unauthorized-modal" tabindex="-1" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative w-full max-w-md max-h-full shadow-2xl">
+            <div class="relative bg-white rounded-lg shadow">
+                <div class="p-6 text-center">
+                    <svg class="mx-auto mb-4 text-yellow-600 w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal text-gray-500">Lo sentimos, la sesión ha expirado</h3>
+                    <button onclick="ReturnLogin()" data-modal-hide="unauthorized-modal" type="button" class="text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-red-300  font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                        Debes volver a iniciar sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorNotification" class="fixed z-40 items-center hidden w-full max-w-xs h-24 p-4  bg-red-50 border border-red-300 divide-x divide-gray-200 rounded-lg shadow right-5 bottom-5" role="alert">
+        <div class="text-lg font-medium text-red-800">Solicitud fallida</div>
+        <div id="textErrorNotification" class="text-sm font-normal">Mensaje de error.</div>
+    </div>
+
+    <div id="successfulNotification" class="fixed z-40 items-center hidden w-full max-w-xs h-24 p-4  bg-green-50 border border-green-300 divide-x divide-gray-200 rounded-lg shadow right-5 bottom-5" role="alert">
+        <div class="text-lg font-medium text-green-800">Solicitud exitosa</div>
+        <div id="textNotificationId" class="text-sm font-normal">Mensaje de error.</div>
+    </div>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const navbar = document.getElementById("navbar");
+            const sidebar = document.getElementById("sidebar");
+            const btnSidebarToggler = document.getElementById("btnSidebarToggler");
+            const navClosed = document.getElementById("navClosed");
+            const navOpen = document.getElementById("navOpen");
+
+            btnSidebarToggler.addEventListener("click", (e) => {
+                e.preventDefault();
+                sidebar.classList.toggle("show");
+                navClosed.classList.toggle("hidden");
+                navOpen.classList.toggle("hidden");
+            });
+
+            sidebar.style.top = parseInt(navbar.clientHeight) - 1 + "px";
+        });
+
+        //modal de no autorizado
+        // Función para abrir el modal
+        function openModalunauthorized() {
+            var modal = document.getElementById("unauthorized-modal");
+            modal.classList.remove("hidden");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.classList.add("overflow-hidden");
+            LogOut();
+        }
+
+        // Función para cerrar el modal
+        function closeModalunauthorized() {
+            var modal = document.getElementById("unauthorized-modal");
+            modal.classList.add("hidden");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("overflow-hidden");
+        }
+
+        // Agregar eventos para abrir y cerrar el modal al hacer clic en los botones correspondientes
+        document.querySelector("[data-modal-hide='unauthorized-modal']").addEventListener("click", closeModalunauthorized);
+
+
+        // Función para abrir el modal
+        function openModal() {
+            var modal = document.getElementById("signoff-modal");
+            modal.classList.remove("hidden");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.classList.add("overflow-hidden");
+        }
+
+        // Función para cerrar el modal
+        function closeModal() {
+            var modal = document.getElementById("signoff-modal");
+            modal.classList.add("hidden");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("overflow-hidden");
+        }
+
+        function ReturnLogin() {
+            window.location.href = "/accounts/login";
+        }
+
+        // Agregar eventos para abrir y cerrar el modal al hacer clic en los botones correspondientes
+        document.querySelector("[data-modal-hide='signoff-modal']").addEventListener("click", closeModal);
+
+
+
+        if (document.querySelector("[data-modal-toggle='signoff-modal']")) {
+            document.querySelector("[data-modal-toggle='signoff-modal']").addEventListener("click", openModal);
+
+        }
+
+
+        // Cerrar el modal si se hace clic fuera del área del modal
+        window.addEventListener("click", function (event) {
+            var modal = document.getElementById("signoff-modal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Cerrar el modal si se presiona la tecla ESC
+        document.addEventListener("keydown", function (event) {
+            var modal = document.getElementById("signoff-modal");
+            if (event.key === "Escape" && modal.classList.contains("hidden") === false) {
+                closeModal();
+            }
+        });
+
+
+
+
+    </script>
+
+
+    @RenderBody()
+
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"
+            integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <script>
+
+        function LogOut() {
+            $.ajax({
+                type: "GET",
+                url: "/Accounts/LogoutWithoutReturnLogin",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                },
+                error: function (error) {
+
+                }
+            });
+        }
+
+        function errorMessage(messageError) {
+            var message = document.getElementById('errorNotification');
+            message.classList.remove('hidden');
+
+            document.getElementById('textErrorNotification').textContent = messageError;
+            // Ocultar el elemento después de 3 segundos
+            setTimeout(function () {
+                message.classList.add('hidden');
+            }, 5000); // 3000 milisegundos = 3 segundos
+        }
+
+        function SuccessfulMessage(employeeId) {
+            var message = document.getElementById('successfulNotification');
+            message.classList.remove('hidden');
+
+
+            document.getElementById('textNotificationId').textContent = employeeId;
+
+            // Ocultar el elemento después de 3 segundos
+            setTimeout(function () {
+            message.classList.add('hidden');
+            }, 3000); // 3000 milisegundos = 3 segundos
+        }
+
+
+        function formatDate(inputDate) {
+            // Crea un objeto Date desde la cadena de fecha
+            var date = new Date(inputDate);
+
+            // Obtiene los componentes de la fecha
+            var day = date.getDate();
+            var month = date.getMonth() + 1; // Los meses en JavaScript son indexados desde 0
+            var year = date.getFullYear();
+
+            // Asegura que el día y el mes tengan dos dígitos
+            day = (day < 10) ? '0' + day : day;
+            month = (month < 10) ? '0' + month : month;
+
+            // Construye la cadena de formato "dd/mm/yyyy"
+            var formattedDate = day + '/' + month + '/' + year;
+
+            return formattedDate;
+        }
+
+        function convertTimeFormat(time) {
+            // Split the time string into hours, minutes, and seconds
+            var parts = time.split(":");
+
+            // Get hours and minutes
+            var hours = parts[0];
+            var minutes = parts[1];
+
+            // Create a date object to format the time
+            var date = new Date();
+            date.setHours(hours);
+            date.setMinutes(minutes);
+
+            // Format the time as HH:mm
+            var formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            return formattedTime;
+        }
+
+        function createTimeDateObject(timeString) {
+            // Get the current date in string format
+            var dateString = new Date().toISOString().slice(0, 10);
+
+            // Combine date and time strings
+            var combinedString = dateString + "T" + timeString;
+
+            // Create a Date object
+            var combinedDate = new Date(combinedString);
+
+            return combinedDate;
+        }
+    </script>
+
+
+   
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

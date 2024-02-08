@@ -1,0 +1,223 @@
+﻿@model TimeClockMVC.Models.AutomaticEmailsViewModel
+
+<div class="container mx-auto py-10">
+    <h1 class="text-3xl font-bold">
+        Envio de incidencias por correo.
+    </h1>
+    <p class="pt-3">
+        Gestiona la notificación automática de incidencias por correo.
+    </p>
+    <div>
+        <h3 class="text-xl font-bold mt-3">Estable las fechas</h3>
+        <div date-rangepicker class="flex items-center">
+            <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                         fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                    </svg>
+                </div>
+                <input name="start"
+                       id="initialDate"
+                       type="date"
+                       value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5"
+                       placeholder="Fecha de Inicio">
+            </div>
+            <span class="mx-4 text-gray-500">a</span>
+            <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                         fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                    </svg>
+                </div>
+                <input name="end"
+                       id="endDate"
+                       type="date"
+                       value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5"
+                       placeholder="Fecha final">
+            </div>
+        </div>
+        <div>
+            <button onclick="SendEmails()"
+                    id="btnEmails"
+                    type="button"
+                    class="w-auto mt-4 py-2 px-4 flex justify-center items-center  bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white  transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg max-w-md">
+                <svg id="loadingEmails" width="20" height="20" fill="currentColor" class="hidden mr-2 animate-spin" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M526 1394q0 53-37.5 90.5t-90.5 37.5q-52 0-90-38t-38-90q0-53 37.5-90.5t90.5-37.5 90.5 37.5 37.5 90.5zm498 206q0 53-37.5 90.5t-90.5 37.5-90.5-37.5-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm-704-704q0 53-37.5 90.5t-90.5 37.5-90.5-37.5-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm1202 498q0 52-38 90t-90 38q-53 0-90.5-37.5t-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm-964-996q0 66-47 113t-113 47-113-47-47-113 47-113 113-47 113 47 47 113zm1170 498q0 53-37.5 90.5t-90.5 37.5-90.5-37.5-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm-640-704q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm530 206q0 93-66 158.5t-158 65.5q-93 0-158.5-65.5t-65.5-158.5q0-92 65.5-158t158.5-66q92 0 158 66t66 158z">
+                    </path>
+                </svg>
+                <p id="textEmails">Enviar</p>
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-4" id="">
+        <label class="relative inline-flex items-center cursor-pointer">
+            <input id="ActiveAutomaticEmails" onclick="PostGeneralConfiguration()" type="checkbox" value="" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Envío automático de correos</span>
+        </label>
+    </div>
+
+</div>
+
+@section Scripts{
+    <script>
+        var token = "@Context.Session.GetString("Token")";
+
+        var urlBase = "@Model.UrlApi";
+
+        GetEmailConfigurationValue();
+
+        function GetEmailConfigurationValue()
+        {
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat('Transactions/GetGeneralConfiguration?ConfigurationName=AutomaticEmails'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    document.getElementById('ActiveAutomaticEmails').checked = data.payload.boolValue;
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+
+        function PostGeneralConfiguration()
+        {
+            var modelJson = {
+                Id: 1, // Asigna un valor adecuado al Id
+                Name: "AutomaticEmails",
+                Description: "description",
+                IntValue: null,
+                DoubleValue: null,
+                BoolValue: document.getElementById('ActiveAutomaticEmails').checked,
+                StringValue: null
+            };
+
+
+            $.ajax({
+                type: "POST",
+                url: urlBase.concat('Transactions/PostGeneralConfiguration'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(modelJson),
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    console.log(data)
+                    SuccessfulMessage("Se ha modificado la configuración de correos.");
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+
+        function SendEmails() {
+
+            var modelJson =
+            {
+                ApiKey: "@Model.ApiKey",
+                IncidenctsReportEmailDto:
+                {
+                    InitialDate: document.getElementById('initialDate').value,
+                    EndDate: document.getElementById('endDate').value,
+                    EmployeeCodes: []
+                }
+            };
+
+
+            $.ajax({
+                type: "POST",
+                url: urlBase.concat('Transactions/SendEmails'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(modelJson),
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                beforeSend: function (jqXHR, settings) {
+                    console.log('Enviando la solicitud...');
+                    // Puedes realizar acciones adicionales aquí, como mostrar un indicador de carga.
+                    document.getElementById('loadingEmails').classList.remove('hidden');
+                    document.getElementById('textEmails').textContent = "Enviando";
+
+
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    console.log(data)
+                    SuccessfulMessage("Se han mandado con éxito los correos.");
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                },
+                complete: function (jqXHR, textStatus) {
+                    console.log('Solicitud completada con estado:', textStatus);
+                    // Puedes realizar acciones adicionales aquí, independientemente del resultado.
+                    document.getElementById('loadingEmails').classList.add('hidden');
+                    document.getElementById('textEmails').textContent = "Enviar";
+
+                }
+            });
+        }
+    </script>
+}

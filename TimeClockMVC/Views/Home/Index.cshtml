@@ -1,0 +1,147 @@
+﻿@model TimeClockMVC.Models.IncidentsTodayViewModel
+
+
+
+<div class="w-10/12 py-32 m-auto">
+    <div>
+        <h1 id="UserName" class="font-bold text-2xl text-amber-900"></h1>
+        <p class="my-2">
+            Aquí podrás gestionar y analizar fácilmente las incidencias de los colaboradores.
+        </p>
+        <a href="/Reports/Incidents" class="text-orange-400 font-medium">Consulta aquí el reporte de incidencias.</a>
+    </div>
+    <h2 class="mt-8 mb-4 font-bold text-xl">Resumen del dia</h2>
+    <div id="cards" class="flex justify-between">
+    </div>
+</div>
+@section Scripts{
+    <script>
+        var token = "@Context.Session.GetString("Token")";
+
+        var urlBase = "@Model.UrlApi";
+        LoadUserName();
+        LoadCards();
+        function LoadUserName() {
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat('Users'),
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    user = data;
+                    console.log(user);
+                    document.getElementById('UserName').textContent = `¡Bienvenido ${data.payload.firstName}!`;
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+                }
+            });
+        }
+
+        function LoadCards() {
+
+            var model = {
+                IncidentsToday: [],
+            Employee : []
+
+            };
+            
+            // Función para hacer una solicitud AJAX y devolver una promesa
+            function makeAjaxRequest(url, token) {
+                return new Promise(function (resolve, reject) {
+                    $.ajax({
+                        type: "GET",
+                        url: url,
+                        contentType: "application/json; charset=utf-8",
+                        headers: {
+                            "Authorization": `Bearer ${token.trim()}`
+                        },
+                        success: function (data) {
+                            // Resuelve la promesa con los datos
+                            resolve(data.payload);
+                        },
+                        error: function (error) {
+                            // Rechaza la promesa con el error
+                            reject(error);
+                        }
+                    });
+                });
+            }
+
+            // Array de promesas para ambas solicitudes
+            var promises = [
+                makeAjaxRequest(urlBase.concat('Employee/GetUpcomingEmployees'), token),
+                makeAjaxRequest(urlBase.concat('Transactions/IncidentsToday'), token)
+            ];
+
+            // Utiliza Promise.all para esperar a que ambas promesas se resuelvan
+            Promise.all(promises)
+                .then(function (results) {
+                    // Maneja los datos de la primera solicitud
+                    console.log(results[0]);
+                    model.Employee = results[0];
+
+                    // Maneja los datos de la segunda solicitud
+                    console.log(results[1]);
+                    model.IncidentsToday = results[1];
+
+                    PartialViewDashboardCards(model);
+
+                })
+                .catch(function (errors) {
+                    // Maneja los errores de ambas solicitudes
+                    console.log(errors);
+
+                    // Verifica si alguno de los errores es un error de autorización (401)
+                    if (errors instanceof Array && errors.some(error => error.status === 401)) {
+                        openModalunauthorized();
+                    } else {
+                        // Maneja otros errores
+                        const firstError = errors instanceof Array ? errors[0].responseJSON.errors[Object.keys(errors[0].responseJSON.errors)[0]] : "Unknown error";
+                        errorMessage(firstError);
+                    }
+                });
+        }
+
+        function PartialViewDashboardCards(data) {
+            $.ajax({
+                type: "POST",
+                url: "/Home/DashboardCards",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(data),
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    //  console.log(data);
+                    $("#cards").empty();
+                    $("#cards").append(data);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+                }
+            });
+        }
+
+
+
+    </script>
+}

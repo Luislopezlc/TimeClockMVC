@@ -1,0 +1,253 @@
+﻿@{
+    Layout = null;
+}
+@model TimeClockMVC.Models.LoginViewModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar sesión - UPQROO</title>
+    <link rel="icon" type="image/png" href="https://upqroo.edu.mx/wp-content/uploads/2022/03/LogoPaginaWeb-150x150.png" sizes="32x32" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TimeClockMVC.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+
+</head>
+
+<body class="bg-fixed bg-cover bg-no-repeat bg-center h-screen" style="background-image: url('/img/Fondo-Uni.png'); ">
+
+    <section>
+        <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+            <a href="#"
+               class="flex items-center mb-6 text-2xl font-semibold text-gray-900">
+            </a>
+            <div class="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+                <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                    <img class="w-40 mx-auto flex justify-center"
+                         src="/img/upqroo_logo.png"
+                         alt="logo" />
+                    <h1 class="text-xl font-bold leading-tight tracking-tight text-white-900 md:text-2xl">
+                        Inicia sesión
+                    </h1>
+                        <div>
+                            <label for="email"
+                                   class="block mb-2 text-sm font-medium text-white-900">Correo</label>
+                            <input type="email"
+                                   name="email"
+                                   id="email"
+                                   class="bg-gray-50 border border-orange-300 text-gray-900 sm:text-sm rounded-lg focus:ring-orange-600 focus:border-orange-600 block w-full p-2.5 "
+                                   placeholder="nombre@compañia.com"
+                                    />
+                        </div>
+                        <div>
+                            <label for="password"
+                                   class="block mb-2 text-sm font-medium text-gray-900">Contraseña</label>
+                            <input type="password"
+                                   name="password"
+                                   id="password"
+                                   placeholder="••••••••"
+                                   class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-600 focus:border-teal-600 block w-full p-2.5" />
+                          
+                            <label id="errorMessage" class="mt-2 text-sm text-red-600">
+                                @Model.MessageError
+                            </label> 
+                            
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input id="remember"
+                                           aria-describedby="remember"
+                                           type="checkbox"
+                                           class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-teal-300 " />
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="remember" class="text-black-500">Recordar en este dispositivo</label>
+                                </div>
+                            </div>
+                            @*<a href="#"
+                            class="text-sm font-medium text-black-500 hover:underline dark:text-black-500">¿Olvidaste la contraseña?</a>*@
+                        </div>
+                        <button onclick="LoginPost()"
+                                type="button"
+                                class="w-full text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                            Entrar
+                        </button>
+
+                        <div class="px-6 sm:px-0 max-w-sm">
+                        <a href="/Accounts/LoginGoogle" type="button" class="text-white w-full  bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between ">
+                                    <svg class="mr-2 -ml-1 w-4 h-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
+                                    Iniciar sesión con Google<div></div></a>
+                        </div>
+                        @*<p class="text-sm font-light text-black-300 dark:text-black-400">
+                        ¿No tienes cuenta?
+                        <a href="#"
+                        class="font-medium text-black-300 hover:underline dark:text-black-500">Registrate</a>
+                        </p>*@
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"
+            integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script>
+
+            var urlBase = "@Model.UrlApi";
+
+
+
+   
+
+    function LoginPost()
+    {
+
+            var model =
+            {
+                Email: document.getElementById('email').value,
+                Password: document.getElementById('password').value,
+            };
+
+
+            $.ajax({
+                type: "POST",
+                url: urlBase.concat('Accounts/LogInUser'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(model),
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    console.log(data)
+                    SaveToken(data);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status != 400 && error.status != 403) {
+                        document.getElementById("errorMessage").textContent = "Ha ocurrido un error, intentar mas tarde";
+                    }
+                    else
+                    {
+                    
+                    //obtenemos las propiedades del objeto errors
+                    const errorKeys = Object.keys(error.responseJSON.errors);
+                    //obtenemos el nombre de la primera propiedad
+                    const firstProperty = errorKeys[0];
+                    //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                    const firstError = error.responseJSON.errors[firstProperty];
+
+                    document.getElementById("errorMessage").textContent = firstError;
+                    }
+                }
+            });
+    }
+
+
+    function SaveToken(model)
+    {
+        console.log('mmmmentre');
+        console.log(model);
+
+        $.ajax({
+            type: "POST",
+            url: '/Accounts/LoginSavetoken',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(model),
+            success: function (data) {
+                // Manejar la respuesta del API externo en caso de éxito
+                console.log(data)
+                GetSidebar(model.token);
+            },
+            error: function (error) {
+                // Manejar errores en caso de que la solicitud falle
+                console.log(error)
+                //obtenemos las propiedades del objeto errors
+                const errorKeys = Object.keys(error.responseJSON.errors);
+                //obtenemos el nombre de la primera propiedad
+                const firstProperty = errorKeys[0];
+                //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                const firstError = error.responseJSON.errors[firstProperty];
+                document.getElementById("errorMessage").textContent = firstError;
+
+            }
+        });
+    }
+
+    function GetSidebar(token)
+    {
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat('Authorization'),
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    console.log(data);
+                    SaveSidebar(data.payload);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        document.getElementById("errorMessage").textContent = firstError;
+                    }
+
+
+                }
+            });
+    }
+
+
+    function SaveSidebar(sidebar)
+    {
+        console.log(sidebar);
+            $.ajax({
+                type: "POST",
+                url: '/Accounts/LoginSaveSidebar',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(sidebar),
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    console.log('sidebar')
+                    console.log(data)
+                    window.location.href = `/${data.controller}/${data.action}`;
+
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+                    //obtenemos las propiedades del objeto errors
+                    const errorKeys = Object.keys(error.responseJSON.errors);
+                    //obtenemos el nombre de la primera propiedad
+                    const firstProperty = errorKeys[0];
+                    //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                    const firstError = error.responseJSON.errors[firstProperty];
+                    document.getElementById("errorMessage").textContent = firstError;
+
+                }
+            });
+    }
+
+</script>
+</body>
+
+</html>

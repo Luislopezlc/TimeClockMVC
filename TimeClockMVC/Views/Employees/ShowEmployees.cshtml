@@ -1,0 +1,358 @@
+﻿@model TimeClockMVC.Models.ShowEmployeesViewModel
+
+
+@*<link rel="stylesheet" href="~//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" asp-append-version="true">*@
+
+<div class="px-28 py-10">
+
+    <h3 class="mb-4 text-xl font-medium text-gray-900">Empleados</h3>
+    <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
+    <div class="relative w-1/3">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+            </svg>
+        </div>
+        <input type="search" id="Destiny" onkeydown="SearchEmployeeEnter(event)" name="search" class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500" placeholder="Buscar en Empleados" required>
+        <button type="button" onclick="GetEmployees(1)" class="text-white absolute right-2.5 bottom-2.5 bg-orange-400 hover:bg-orange-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Buscar</button>
+    </div>
+
+</div>
+
+
+<!-- employee table -->
+
+<div id="employees" class=" relative content-baseline  grid place-items-center">
+</div>
+
+@section Scripts{
+
+    <script>
+
+        function addPagination() {
+            const pag = document.getElementById('page');
+            const totalpag = document.getElementById('totalPages');
+            var pageCurrent = pag.textContent;
+
+            var pagNext = parseInt(pageCurrent) + 1;
+            document.getElementById('page').textContent = pagNext;
+            console.log(pagNext)
+            GetEmployees(pagNext)
+        }
+
+        function lessPagination() {
+            const pag = document.getElementById('page');
+            const totalpag = document.getElementById('totalPages');
+            var pageCurrent = pag.textContent;
+
+            var pagNext = parseInt(pageCurrent) - 1;
+            document.getElementById('page').textContent = pagNext;
+            console.log(pagNext)
+            GetEmployees(pagNext)
+        }
+
+
+        function SendSchedules(employeeId) {
+            // window.location.href = '/accounts/login'
+            var schedules = [];
+            if (document.querySelector('input[name="MondayDayValue-' + employeeId + '"]').checked) {
+                var monday = {
+                    CheckInTime: document.querySelector('input[name="MondayCheckInTime-' + employeeId + '"]').value,
+                    CheckOutTime: document.querySelector('input[name="MondayCheckOutTime-' + employeeId + '"]').value,
+                    ValueDay: document.querySelector('input[name="MondayDayValue-' + employeeId + '"]').value,
+                    EmployeeCode: String(employeeId)
+                };
+
+                schedules.push(monday);
+            }
+
+            if (document.querySelector('input[name="TuesdayDayValue-' + employeeId + '"]').checked) {
+                var tuesday = {
+                    CheckInTime: document.querySelector('input[name="TuesdayCheckInTime-' + employeeId + '"]').value,
+                    CheckOutTime: document.querySelector('input[name="TuesdayCheckOutTime-' + employeeId + '"]').value,
+                    ValueDay: document.querySelector('input[name="TuesdayDayValue-' + employeeId + '"]').value,
+                    EmployeeCode: String(employeeId)
+                };
+
+                schedules.push(tuesday);
+            }
+
+            if (document.querySelector('input[name="WednesdayDayValue-' + employeeId + '"]').checked) {
+                var wednesday = {
+                    CheckInTime: document.querySelector('input[name="WednesdayCheckInTime-' + employeeId + '"]').value,
+                    CheckOutTime: document.querySelector('input[name="WednesdayCheckOutTime-' + employeeId + '"]').value,
+                    ValueDay: document.querySelector('input[name="WednesdayDayValue-' + employeeId + '"]').value,
+                    EmployeeCode: String(employeeId)
+                };
+
+                schedules.push(wednesday);
+            }
+
+            if (document.querySelector('input[name="ThursdayDayValue-' + employeeId + '"]').checked) {
+                var thursday = {
+                    CheckInTime: document.querySelector('input[name="ThursdayCheckInTime-' + employeeId + '"]').value,
+                    CheckOutTime: document.querySelector('input[name="ThursdayCheckOutTime-' + employeeId + '"]').value,
+                    ValueDay: document.querySelector('input[name="ThursdayDayValue-' + employeeId + '"]').value,
+                    EmployeeCode: String(employeeId)
+                };
+
+                schedules.push(thursday);
+            }
+
+
+            if (document.querySelector('input[name="FridayDayValue-' + employeeId + '"]').checked) {
+                var friday = {
+                    CheckInTime: document.querySelector('input[name="FridayCheckInTime-' + employeeId + '"]').value,
+                    CheckOutTime: document.querySelector('input[name="FridayCheckOutTime-' + employeeId + '"]').value,
+                    ValueDay: document.querySelector('input[name="FridayDayValue-' + employeeId + '"]').value,
+                    EmployeeCode: String(employeeId)
+                };
+
+                schedules.push(friday);
+            }
+
+            if (schedules.length == 0) {
+                errorMessage('No se pueden ingresar horarios vacios');
+                return;
+            }
+
+            console.log(schedules)
+
+            var jsonData = JSON.stringify(schedules);
+
+            var token = "@Context.Session.GetString("Token")";
+            var urlBase = "@Model.UrlApi";
+
+
+            $.ajax({
+                type: "POST",
+                url: urlBase.concat('Schedules'),
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`  // Reemplaza "tu_token_aqui" con el token real
+                },
+                data: jsonData,
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    SuccessfulMessage("Se insertó correctamente el horario del empleado: " + employeeId)
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+
+                    if (error.status == 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+
+                }
+            });
+
+
+        }
+
+
+        function disableByCheckBoxMonday(employeeId) {
+            var mondayCheckbox = document.querySelector('input[name="MondayDayValue-' + employeeId + '"]');
+
+            if (mondayCheckbox.checked) {
+                document.querySelector('input[name="MondayCheckInTime-' + employeeId + '"]').disabled = false;
+                document.querySelector('input[name="MondayCheckOutTime-' + employeeId + '"]').disabled = false;
+            }
+            else {
+                document.querySelector('input[name="MondayCheckInTime-' + employeeId + '"]').disabled = true;
+                document.querySelector('input[name="MondayCheckOutTime-' + employeeId + '"]').disabled = true;
+            }
+
+        }
+
+        function disableByCheckBoxTuesday(employeeId) {
+            var mondayCheckbox = document.querySelector('input[name="TuesdayDayValue-' + employeeId + '"]');
+
+            if (mondayCheckbox.checked) {
+                document.querySelector('input[name="TuesdayCheckInTime-' + employeeId + '"]').disabled = false;
+                document.querySelector('input[name="TuesdayCheckOutTime-' + employeeId + '"]').disabled = false;
+            }
+            else {
+                document.querySelector('input[name="TuesdayCheckInTime-' + employeeId + '"]').disabled = true;
+                document.querySelector('input[name="TuesdayCheckOutTime-' + employeeId + '"]').disabled = true;
+            }
+
+        }
+
+        function disableByCheckBoxWednesday(employeeId) {
+            var mondayCheckbox = document.querySelector('input[name="WednesdayDayValue-' + employeeId + '"]');
+
+            if (mondayCheckbox.checked) {
+                document.querySelector('input[name="WednesdayCheckInTime-' + employeeId + '"]').disabled = false;
+                document.querySelector('input[name="WednesdayCheckOutTime-' + employeeId + '"]').disabled = false;
+            }
+            else {
+                document.querySelector('input[name="WednesdayCheckInTime-' + employeeId + '"]').disabled = true;
+                document.querySelector('input[name="WednesdayCheckOutTime-' + employeeId + '"]').disabled = true;
+            }
+
+        }
+
+
+        function disableByCheckBoxThursday(employeeId) {
+            var mondayCheckbox = document.querySelector('input[name="ThursdayDayValue-' + employeeId + '"]');
+
+            if (mondayCheckbox.checked) {
+                document.querySelector('input[name="ThursdayCheckInTime-' + employeeId + '"]').disabled = false;
+                document.querySelector('input[name="ThursdayCheckOutTime-' + employeeId + '"]').disabled = false;
+            }
+            else {
+                document.querySelector('input[name="ThursdayCheckInTime-' + employeeId + '"]').disabled = true;
+                document.querySelector('input[name="ThursdayCheckOutTime-' + employeeId + '"]').disabled = true;
+            }
+
+        }
+
+        function disableByCheckBoxFriday(employeeId) {
+            var mondayCheckbox = document.querySelector('input[name="FridayDayValue-' + employeeId + '"]');
+
+            if (mondayCheckbox.checked) {
+                document.querySelector('input[name="FridayCheckInTime-' + employeeId + '"]').disabled = false;
+                document.querySelector('input[name="FridayCheckOutTime-' + employeeId + '"]').disabled = false;
+            }
+            else {
+                document.querySelector('input[name="FridayCheckInTime-' + employeeId + '"]').disabled = true;
+                document.querySelector('input[name="FridayCheckOutTime-' + employeeId + '"]').disabled = true;
+            }
+
+        }
+
+
+        GetEmployees(1);
+
+        function GetEmployees(page) {
+            var token = "@Context.Session.GetString("Token")";
+            //console.log(token.trim())
+
+            var urlBase = "@Model.UrlApi";
+            // console.log(urlBase);
+
+
+            var model =
+            {
+                Pagination:
+                {
+                    Page: page,
+                    RecordsForPage: 10,
+                },
+                Search: document.getElementById('Destiny').value
+            };
+
+            //llamada al api la cual trae la lista de empleados paginada
+            $.ajax({
+                type: "GET",
+                url: urlBase.concat(`Employee/PaginatedList?Pagination.Page=${model.Pagination.Page}&Pagination.RecordsForPage=${model.Pagination.RecordsForPage}&Search=${model.Search}`),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}`  // Reemplaza "tu_token_aqui" con el token real
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    PartialViewEmployeeTable(data.payload)
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status == 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                        //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                    }
+
+                }
+            });
+
+        }
+
+        //llena la tabla de empleado desde una vista parcial
+        function PartialViewEmployeeTable(employeesData) {
+            $.ajax({
+                type: "POST",
+                url: "/Employees/EmployeesTable",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(employeesData),
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    //  console.log(data);
+                    $("#employees").empty();
+                    $("#employees").append(data);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+                }
+            });
+        }
+
+
+
+        var token = "@Context.Session.GetString("Token")";
+        var urlBase = "@Model.UrlApi";
+        $(document).ready(function () {
+            $("#Destiny").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        type: "GET",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        headers: {
+                            "Authorization": `Bearer ${token.trim()}`  // Reemplaza "tu_token_aqui" con el token real
+                        },
+                        url: urlBase.concat(`Employee/GetEmployeeSearchBar/${request.term}`),
+                        success: function (data) {
+                            response(data.payload)
+                        },
+                        error: function (error) {
+                            // Manejar errores en caso de que la solicitud falle
+                            console.log(error)
+                            if (error.status == 401) {
+                                openModalunauthorized();
+                            }
+                            else {
+                                //obtenemos las propiedades del objeto errors
+                                const errorKeys = Object.keys(error.responseJSON.errors);
+                                //obtenemos el nombre de la primera propiedad
+                                const firstProperty = errorKeys[0];
+                                //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                                const firstError = error.responseJSON.errors[firstProperty];
+
+                                errorMessage(firstError);
+                            }
+                        }
+                    })
+                }
+            })
+        })
+
+        function SearchEmployeeEnter(event) {
+            if (event.keyCode == 13) {
+                GetEmployees(1);
+            }
+        }
+    </script>
+}

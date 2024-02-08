@@ -1,0 +1,204 @@
+﻿@model TimeClockMVC.Models.UpdateUserViewModel
+
+<!--Tabla del business-->
+<div class="relative overflow-x-auto shadow-md">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    Id
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Area
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Puesto
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Es jefe
+                </th>
+                <th scope="col" class="px-6 py-3">
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.User != null && Model.User.AreasUsers != null && Model.User.AreasUsers.Any())
+            {
+                @foreach (var users in Model.User.AreasUsers)
+                {
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            @users.Id
+                        </th>
+                        <td class="px-6 py-4">
+                            @users.Area
+                        </td>
+                        <td class="px-6 py-4">
+                            @users.Position
+                        </td>
+                        <td class="px-6 py-4">
+                            @users.IsLeader
+                        </td>
+                        <td class="px-6 py-4 text-left">
+                            <button onclick=" LoadAreasUser(@users.Id, '@users.Area', '@users.Position', '@users.IsLeader');" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                            type="button">
+                                Editar
+                            </button>
+                        </td>
+                        <td class="px-6 py-4 text-left">
+                            <button onclick=" OpenModalDeleteArea(@users.Id)" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                            type="button">
+                                Eliminar
+                            </button>
+                            
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="areaDelete"
+     tabindex="-1"
+     class="fixed inset-0 z-40 hidden flex items-center justify-center">
+    <div class="relative w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow">
+            <button type="button" onclick="CloseModalDeleteArea()"
+                    class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center"
+                    data-modal-hide="popup-modal">
+                <svg class="w-3 h-3"
+                     aria-hidden="true"
+                     xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 14 14">
+                    <path stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12"
+                     aria-hidden="true"
+                     xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 20 20">
+                    <path stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-500">
+                    ¿Estas seguro que quires eliminar este?
+                </h3>
+                <input id="areaUserForDelete" class="hidden" />
+                <button type="button" onclick="DeleteAreaUser()"
+                        class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    Si, estoy seguro
+                </button>
+                <button onclick="CloseModalDeleteArea()"
+                        type="button"
+                        class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                    No, cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    function OpenModalDeleteArea(areaIdDelete) {
+        var modal = document.getElementById('areaDelete');
+        modal.classList.remove('hidden');
+        document.getElementById('areaUserForDelete').value = areaIdDelete;
+    }
+
+    function CloseModalDeleteArea() {
+        var modal = document.getElementById('areaDelete');
+        modal.classList.add('hidden');
+    }
+
+    var empcode = "@Model.Empcode";
+    var token = "@Context.Session.GetString("Token")";
+    var urlBase = "@Model.UrlApi";
+    function DeleteAreaUser() {
+        
+        var id = document.getElementById('areaUserForDelete').value;
+            $.ajax({
+            type: "DELETE",
+            url: urlBase.concat(`Users/DeleteAreaUser/${id}`),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "Authorization": `Bearer ${token.trim()}`
+            },
+            success: function (data) {
+                SuccessfulMessage("Se ha eliminado el area")
+                LoadUser();
+
+            },
+            error: function (error) {
+                console.log(error)
+
+                if (error.status == 401) {
+                    openModalunauthorized();
+                }
+                else {
+                    //obtenemos las propiedades del objeto errors
+                    const errorKeys = Object.keys(error.responseJSON.errors);
+                    //obtenemos el nombre de la primera propiedad
+                    const firstProperty = errorKeys[0];
+                    //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                    const firstError = error.responseJSON.errors[firstProperty];
+
+                    errorMessage(firstError);
+                }
+            }
+        });
+
+        CloseModalDeleteArea();
+
+    }
+
+
+    var token = "@Context.Session.GetString("Token")";
+    var urlBase = "@Model.UrlApi";
+    $(document).ready(function () {
+        $("#area_user").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    headers: {
+                        "Authorization": `Bearer ${token.trim()}`  // Reemplaza "tu_token_aqui" con el token real
+                    },
+                    url: urlBase.concat(`BusinessStructure/GetAreasName/?Search=${request.term}`),
+                    success: function (data) {
+                        response(data.payload)
+                    },
+                    error: function (error) {
+                        // Manejar errores en caso de que la solicitud falle
+                        if (error.status == 401) {
+                            openModalunauthorized();
+                        }
+                        else {
+                            //obtenemos las propiedades del objeto errors
+                            const errorKeys = Object.keys(error.responseJSON.errors);
+                            //obtenemos el nombre de la primera propiedad
+                            const firstProperty = errorKeys[0];
+                            //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                            const firstError = error.responseJSON.errors[firstProperty];
+
+                            errorMessage(firstError);
+                        }
+                    }
+                })
+            }
+        })
+    })
+</script>

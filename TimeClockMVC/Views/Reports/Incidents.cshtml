@@ -1,0 +1,198 @@
+﻿@model TimeClockMVC.Models.IncidentReportsViewModel
+
+<link rel="stylesheet" href="~//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" asp-append-version="true">
+
+<div class="mx-0">
+    <div class="relative w-full flex flex-col mb-6 mx-0">
+        <h1 class="font-semibold text-4xl m-4 px-5">
+            Reporte de incidencias
+        </h1>
+        <h4 class="font-semibold text-lg m-4 inline-block px-5 pb-8">
+            Maximiza la productividad de tu área de RH con nuestro software de reporte de incidencias digitalizado. Ahorra tiempo y evita errores manuales.
+        </h4>
+        <div class="block w-42rem mx-auto p-2.5 bg-amber-700 rounded-md">
+            <p class="mb-2 text-2xl text-white font-semibold">Filtros</p>
+            <div class="w-auto grid grid-cols-4 gap-4 mb-2">
+
+                <div class="text-white font-semibold">
+                    Fecha inicial
+                </div>
+                <div class="text-white font-semibold">
+                    Fecha final
+                </div>
+                <div class="col-span-2 text-white font-semibold">
+                    Búsqueda de empleados
+                </div>
+
+                <div>
+                    <input model="initialDate"
+                           type="date"
+                           id="initialDate"
+                           name="InitialDate"
+                           class="p-2 border-solid border-2 border-orange-400 rounded-md border focus:border-gray-900 focus:outline-none"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                           
+                </div>
+                <div>
+                    <input model="EndDate"
+                           type="date"
+                           id="endDate"
+                           name="endDate"
+                           class="p-2 border-solid border-2 border-orange-400 rounded-md border focus:border-gray-900 focus:outline-none" 
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-span-2">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                            </svg>
+                        </div>
+                        <input type="search" id="search" name="search" class="block w-full p-2 pl-10 text-gray-900 border-solid border-2 border-orange-400 border focus:border-gray-900 focus:outline-none rounded-md" placeholder="Buscar empleados">
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 border-gray-200 rounded-b">
+                <button onclick="GetIncidentReport(1)" type="button" class="font-semibold text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 rounded-lg px-5 py-2.5 text-center">Generar</button>
+            </div>
+        </div>
+
+        
+            <div id="incidents" class="block m-4 p-4 w-full" style="margin-left: 0px;">
+
+            <div class="content-center flex justify-center mt-5">
+                <label class="text-4xl text-gray-900">Genera un reporte de incidencias</label>
+            </div>
+            </div>
+
+
+        
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        var token = "@Context.Session.GetString("Token")";
+        var urlBase = "@Model.UrlApi";
+        $(document).ready(function () {
+            $("#search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        type: "GET",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        headers: {
+                            "Authorization": `Bearer ${token.trim()}`  // Reemplaza "tu_token_aqui" con el token real
+                        },
+                        url: urlBase.concat(`Employee/GetEmployeeSearchBar/${request.term}`),
+                        success: function (data) {
+                            response(data.payload)
+                        },
+                        error: function (error) {
+                            // Manejar errores en caso de que la solicitud falle
+                            console.log(error)
+
+                            if (error.status == 401) {
+                                openModalunauthorized();
+                            }
+                            else {
+                                //obtenemos las propiedades del objeto errors
+                                const errorKeys = Object.keys(error.responseJSON.errors);
+                                //obtenemos el nombre de la primera propiedad
+                                const firstProperty = errorKeys[0];
+                                //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                                const firstError = error.responseJSON.errors[firstProperty];
+
+                                errorMessage(firstError);
+                            }
+                        }
+                    })
+                }
+            })
+        })
+
+       
+        //hace una petecion al api para generar el reporte de incidencias
+        function GetIncidentReport(page)
+        {
+            var request = 
+            {
+                Pagination:
+                {
+                    Page: page,
+                    RecordsForPage: 10,
+                },
+                InitialDate: document.getElementById('initialDate').value,
+                EndDate: document.getElementById('endDate').value,
+                Search: document.getElementById('search').value
+            }
+
+            var token = "@Context.Session.GetString("Token")";
+
+            var urlBase = "@Model.UrlApi";
+
+            $.ajax({
+                type: "POST",
+                url: urlBase.concat('Transactions/GenerateIncidentRepor'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(request),
+                headers: {
+                    "Authorization": `Bearer ${token.trim()}` 
+                },
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    console.log(data)
+                    if (data.payload == null || data.payload.employees.length < 1)
+                    {
+                        SuccessfulMessage("No se encontraron incidencias en este periodo.");
+                    }
+                    PartialViewIncidentsTable(data.payload);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+
+                    if (error.status === 401) {
+                        openModalunauthorized();
+                    }
+                    else {
+                     //obtenemos las propiedades del objeto errors
+                        const errorKeys = Object.keys(error.responseJSON.errors);
+                        //obtenemos el nombre de la primera propiedad
+                        const firstProperty = errorKeys[0];
+                        //obtenemos el valor de la primera propiedad usando el nombre que obtenimos anteriormente
+                        const firstError = error.responseJSON.errors[firstProperty];
+
+                        errorMessage(firstError);
+                        PartialViewIncidentsTable();
+                    }
+                   
+
+                }
+            });
+        }
+
+        //llena la tabla de incidencias desde una vista parcial
+        function PartialViewIncidentsTable(incidents) {
+            $.ajax({
+                type: "POST",
+                url: "/Reports/IncidentsReportTable",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(incidents),
+                success: function (data) {
+                    // Manejar la respuesta del API externo en caso de éxito
+                    //  console.log(data);
+                    $("#incidents").empty();
+                    $("#incidents").append(data);
+                },
+                error: function (error) {
+                    // Manejar errores en caso de que la solicitud falle
+                    console.log(error)
+                }
+            });
+        }
+
+    </script>
+}

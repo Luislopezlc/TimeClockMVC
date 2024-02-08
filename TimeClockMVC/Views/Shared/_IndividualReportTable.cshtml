@@ -1,0 +1,83 @@
+﻿@model TimeClockMVC.Models.IndividualReportViewModel
+
+<div class="relative overflow-x-auto mt-4">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    Empleado
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Faltas
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Fechas faltas
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Fechas faltas antes de la hora de salida
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Retardos menores
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Fechas retardos menores
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Retardos mayores
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Fechas retardos mayores
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Total de descuentos
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.IncidentReport != null && Model.IncidentReport.EmployeeIncidentsReport != null)
+            {
+                <tr class="bg-white border-b">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        @Model.IncidentReport.EmployeeIncidentsReport.FullName
+                    </th>
+                    <td class="px-6 py-4">
+                    @Model.IncidentReport.EmployeeIncidentsReport.Absences
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @foreach (var absenceDate in Model.IncidentReport.EmployeeIncidentsReport.AbsenceDates)
+                        {
+                            <p>@absenceDate</p>
+                        }
+                    </td>
+                     <td class="px-6 py-4 whitespace-nowrap">
+                        @foreach (var absenceDate in Model.IncidentReport.EmployeeIncidentsReport.AbsenceDatesWithoutExit)
+                        {
+                           <p>@absenceDate</p>
+                        }
+                    </td>
+                    <td class="px-6 py-4">
+                        @Model.IncidentReport.EmployeeIncidentsReport.MinorDelays
+                    </td>
+                     <td class="px-6 py-4 whitespace-nowrap">
+                        @foreach (var minorDelayDate in @Model.IncidentReport.EmployeeIncidentsReport.MinorDelayDates)
+                        {
+                            <p>@minorDelayDate</p>
+                        }
+                    </td>
+                    <td class="px-6 py-4">
+                        @Model.IncidentReport.EmployeeIncidentsReport.LongerDelays
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @foreach (var longerDelayDates in @Model.IncidentReport.EmployeeIncidentsReport.LongerDelaysDates)
+                        {
+                            <p>@longerDelayDates</p>
+                        }
+                    </td>
+                    <td class="px-6 py-4">
+                    @Model.IncidentReport.EmployeeIncidentsReport.TotalIncidents
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
